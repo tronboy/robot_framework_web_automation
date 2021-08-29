@@ -10,15 +10,15 @@ ${SCREENSHOT_PATH}  ./screenshots/your desired name
 *** Test Cases ***
 
 
-Open Browser2
+Open Browser
      Open browser
 Login
      loginto
 VerifyLogin
     VerifyLogin    
-Logout2
+Logout
     Logout
-Close Browser2
+Close Browser
      close browser
 
 
