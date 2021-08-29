@@ -14,7 +14,7 @@ stages:
       vmImage: 'ubuntu-latest'
 
     variables:
-      testLog: 'https://ezhappstorage.blob.core.windows.net/public-assets/images/logo.png?st=2021-02-26T09%3A13%3A46Z&se=2022-02-27T09%3A13%3A00Z&sp=r&sv=2017-07-29&sr=b&sig=UVIb5KUm4dlLHd81zoADh%2Be5z%2FRiwneVddH%2FLamy8dU%3D'
+      testLog: 'URL for Test Log'
     steps:
     - task: UsePythonVersion@0
       inputs:
