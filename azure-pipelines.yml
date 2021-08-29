@@ -1,0 +1,105 @@
+# Python package
+
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+trigger: none
+
+stages:
+- stage: Test
+  jobs:
+  - job: Test
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    variables:
+      testLog: 'https://ezhappstorage.blob.core.windows.net/public-assets/images/logo.png?st=2021-02-26T09%3A13%3A46Z&se=2022-02-27T09%3A13%3A00Z&sp=r&sv=2017-07-29&sr=b&sig=UVIb5KUm4dlLHd81zoADh%2Be5z%2FRiwneVddH%2FLamy8dU%3D'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.9'
+      displayName: 'Use Python 3.9'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install robotframework robotframework-seleniumlibrary robotframework-selenium2library  && npm install chromedriver
+      displayName: 'Install dependencies'
+
+    - script: |
+        pip install pytest pytest-azurepipelines 
+      displayName: 'pytest'
+  
+    - powershell: robot --pythonpath . -x outputxunit.xml yourfilename.robot #Put your file here that is already uploaded into repository of Azure
+      displayName: 'Run Robot Scripts'
+      continueOnError: true
+
+  
+    - task: CopyFiles@1
+      inputs:
+        Contents: |
+          **/* 
+          !*.yml 
+          !*.robot 
+          !*.xml
+        TargetFolder: './results_temp'    #This is the temp folder to copy all logs stored in VM, contents can be selected upon one's discreation to copy
+      continueOnError: true  
+
+  
+    - task: ArchiveFiles@2			#This task is to archive the copied data, name and format can be selected upon one's discreation
+      inputs:
+        rootFolderOrFile: './results_temp' 
+        includeRootFolder: true 
+        archiveType: 'zip'
+        tarCompression: 'gz' 
+        archiveFile: './results_temp/logs.zip' 
+        replaceExistingArchive: true 
+        #verbose: # Optional
+        #quiet: # Optional
+    - pwsh: Write-Host '##vso[task.setvariable variable=testLog;isOutput=true]https:your URL to archive
+      name: logFile
+
+
+    - task: PublishBuildArtifacts@1		#This task is to publish the archived data as a Reults in the Azure pipeline after the run is completed
+      inputs:
+        PathtoPublish: './results_temp' # selected folder to publish from results_temp
+        ArtifactName: 'results' #Folder to save the Screenshots Specifically
+     continueOnError: true
+
+
+
+- stage: Email		#This task is to notify via email once the run is completed to specified recipients
+  dependsOn: Test
+  jobs:
+  - job: Email
+    pool: server
+    variables:
+      prevStageVar: $[stageDependencies.Test.Test.outputs['logFile.testLog']]
+    steps:
+    - task: InvokeRESTAPI@1
+      inputs:
+        connectionType: 'connectedServiceName'
+        serviceConnection: 'notification hub test'
+        method: 'POST'
+        headers: |
+          {
+          "Content-Type":"application/json"
+          }
+        body: |
+          {
+          	"messageType": "EMAIL",
+          	"messageTitle": "email subject here",
+          	"messageContent": "body content here",
+          	"recipients": [
+                  {
+          			"recipientId": "youremail@mail.com",
+          			"recipientName": "your name"
+          		},
+                  {
+                      "recipientId": "youremail2@mail.com",
+          			"recipientName": "yourname2"
+                  }	
+          	],
+              "attachments":[{"fileName":"your attachment", }
+        urlSuffix: '/api/Notifications'
+        waitForCompletion: 'false'
