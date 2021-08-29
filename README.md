@@ -5,7 +5,7 @@ Create an Azure Repository
 
 Add the files in the Repository
 
-Eit the Robot file according to the instructions given inside the file
+Edit the Robot file according to the instructions given inside the file
 
 Create a new Pipeline>>>Edit the YML file according to the instructions given inside the file
 
