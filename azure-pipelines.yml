@@ -4,8 +4,6 @@
 # Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 
-trigger: none  //Trigger has been set in the Edit Pipeline settings
-
 stages:
 - stage: Test
   jobs:
