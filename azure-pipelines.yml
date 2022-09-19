@@ -65,4 +65,3 @@ stages:
         PathtoPublish: './results_temp' # selected folder to publish from results_temp
         ArtifactName: 'results' #Folder to save the Screenshots Specifically
      continueOnError: true
-
