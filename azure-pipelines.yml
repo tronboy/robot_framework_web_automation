@@ -30,7 +30,7 @@ stages:
         pip install pytest pytest-azurepipelines 
       displayName: 'pytest'
   
-    - powershell: robot --pythonpath . -x outputxunit.xml yourfilename.robot #Put your file here that is already uploaded into repository of Azure
+    - powershell: robot --pythonpath . -x outputxunit.xml Sample.robot #Put your file here that is already uploaded into repository of Azure
       displayName: 'Run Robot Scripts'
       continueOnError: true
 
@@ -66,40 +66,3 @@ stages:
         ArtifactName: 'results' #Folder to save the Screenshots Specifically
      continueOnError: true
 
-
-
-- stage: Email		#This task is to notify via email once the run is completed to specified recipients
-  dependsOn: Test
-  jobs:
-  - job: Email
-    pool: server
-    variables:
-      prevStageVar: $[stageDependencies.Test.Test.outputs['logFile.testLog']]
-    steps:
-    - task: InvokeRESTAPI@1
-      inputs:
-        connectionType: 'connectedServiceName'
-        serviceConnection: 'notification hub test'
-        method: 'POST'
-        headers: |
-          {
-          "Content-Type":"application/json"
-          }
-        body: |
-          {
-          	"messageType": "EMAIL",
-          	"messageTitle": "email subject here",
-          	"messageContent": "body content here",
-          	"recipients": [
-                  {
-          			"recipientId": "youremail@mail.com",
-          			"recipientName": "your name"
-          		},
-                  {
-                      "recipientId": "youremail2@mail.com",
-          			"recipientName": "yourname2"
-                  }	
-          	],
-              "attachments":[{"fileName":"your attachment", }
-        urlSuffix: '/api/Notifications'
-        waitForCompletion: 'false'
